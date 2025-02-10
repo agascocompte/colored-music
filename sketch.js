@@ -70,7 +70,7 @@ function handleButtonPressed(num) {
         paused = false;
         playButton.classList.remove("hidden");
         pauseButton.classList.add("hidden");
-    } else if (num === 1) { // Play / Pause toggle
+    } else if (num === 1) { // Play / Pause 
         if (sound[song].isPlaying()) {
             sound[song].pause();
             paused = true;
@@ -89,6 +89,7 @@ function handleButtonPressed(num) {
 		paused = false;
 		playButton.classList.add("hidden");
 		pauseButton.classList.remove("hidden");
+		highlightCurrentSong();
     } else { // Previous
         sound[song].stop();
         if (song > 0) song--;
@@ -96,6 +97,7 @@ function handleButtonPressed(num) {
 		paused = false;
 		playButton.classList.add("hidden");
 		pauseButton.classList.remove("hidden");
+		highlightCurrentSong();
     }
 }
 
@@ -198,6 +200,79 @@ function lineasVerticales() {
   		
   	}
 }
+
+function populateSongList() {
+    const songList = document.getElementById("songList");
+    songList.innerHTML = ""; 
+
+    songNames.forEach((songName, index) => {
+        let li = document.createElement("li");
+        li.textContent = songName.replace(/_/g, " ");
+        li.classList.add("cursor-pointer", "hover:bg-blue-500", "p-2", "rounded-md", "transition");
+       
+        if (index === song) {
+            li.classList.add("text-green-400", "font-semibold");
+        }
+
+        li.onclick = function () {
+            selectSong(index);
+        };
+
+        songList.appendChild(li);
+    });
+}
+
+function highlightCurrentSong() {
+    let items = document.querySelectorAll("#songList li");
+    items.forEach((li, index) => {
+        if (index === song) {
+            li.classList.add("text-green-400", "font-semibold");
+        } else {
+            li.classList.remove("text-green-400", "font-semibold");
+        }
+    });
+}
+
+function selectSong(index) {
+    if (index >= 0 && index < songNames.length) {
+        sound[song].stop(); 
+        song = index;
+        sound[song].play();
+        paused = false;
+
+        document.getElementById("songSelected").textContent = songNames[song];
+        document.getElementById("pause").classList.remove("hidden");
+        document.getElementById("play").classList.add("hidden");
+
+        highlightCurrentSong();
+    }
+}
+
+
+function addNewSong(event) {
+    const files = event.target.files;
+    if (!files.length) return;
+
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        if (!file.name.endsWith(".mp3")) {
+            alert(`"${file.name}" is not a valid MP3 file.`);
+            continue;
+        }
+
+        const objectURL = URL.createObjectURL(file); 
+        const songName = file.name.replace(".mp3", ""); 
+
+        sound.push(loadSound(objectURL));
+        songNames.push(songName);
+        maxSongs = sound.length;
+    }
+
+    populateSongList();
+}
+
+populateSongList();
 
 
 

@@ -7,59 +7,101 @@
     <script language="javascript" type="text/javascript" src="libraries/p5.js"></script>
     <script language="javascript" type="text/javascript" src="libraries/p5.dom.js"></script>
     <script language="javascript" type="text/javascript" src="libraries/p5.sound.js"></script>
-    <script language="javascript" type="text/javascript" src="sketch.js"></script>
     <title>Colored Music</title>
+    <style>
+        #p5_loading {
+            display: none;
+        }
+
+        #songList::-webkit-scrollbar {
+            width: 8px; 
+        }
+
+        #songList::-webkit-scrollbar-track {
+            background: #1e293b;
+            border-radius: 8px;
+        }
+
+        #songList::-webkit-scrollbar-thumb {
+            background: #2563eb; 
+            border-radius: 8px;
+        }
+
+        #songList::-webkit-scrollbar-thumb:hover {
+            background: #60a5fa; 
+        }
+
+    </style>
 </head>
 
 <body class="bg-gray-900 text-white font-sans min-h-screen flex flex-col items-center justify-center">
 
     <h1 class="text-4xl font-bold mb-8 text-center text-blue-400">Colored Music</h1>
 
-    <div id="musicContainer" class="flex flex-col items-center gap-6 w-full max-w-4xl">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-6xl items-start">
+            
+        <div id="musicContainer" class="flex flex-col items-center gap-6">
+            <div id="canvas" class="bg-gray-800 rounded-lg shadow-lg w-full max-w-[550px] h-[550px]"></div>
 
-        <div id="canvas" class="bg-gray-800 rounded-lg shadow-lg w-[550px] h-[550px]"></div>
+            <div id="buttons" class="flex justify-center gap-4">
+                <button id="back" class="w-10 h-10 bg-blue-500 hover:bg-blue-400 text-white rounded-md flex items-center justify-center cursor-pointer transition" onclick="handleButtonPressed(-2)">
+                    <svg class="w-6 h-6" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M6 14H8L8 9L13 14H15L15 2H13L8 7L8 2H6L0 8L6 14Z"></path>
+                    </svg>
+                </button>
+                <button id="play" class="w-10 h-10 bg-blue-500 hover:bg-blue-400 text-white rounded-md flex items-center justify-center cursor-pointer transition" onclick="handleButtonPressed(1)">
+                    <svg class="w-6 h-6" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 16L7 16L15 8L7 0L5 0L5 16Z"></path>
+                    </svg>
+                </button>
+                <button id="pause" class="w-10 h-10 bg-blue-500 hover:bg-blue-400 text-white rounded-md flex items-center justify-center cursor-pointer transition hidden" onclick="handleButtonPressed(1)">
+                    <svg class="w-6 h-6" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="3" y="1" width="2" height="14"></rect>
+                        <rect x="12" y="1" width="2" height="14"></rect>
+                    </svg>
+                </button>
+                <button id="stop" class="w-10 h-10 bg-blue-500 hover:bg-blue-400 text-white rounded-md flex items-center justify-center cursor-pointer transition" onclick="handleButtonPressed(0)">
+                    <svg class="w-6 h-6" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="1" y="1" width="14" height="14"></rect>
+                    </svg>
+                </button>
+                <button id="next" class="w-10 h-10 bg-blue-500 hover:bg-blue-400 text-white rounded-md flex items-center justify-center cursor-pointer transition" onclick="handleButtonPressed(2)">
+                    <svg class="w-6 h-6" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 14H1L1 2H3L8 7L8 2H10L16 8L10 14H8L8 9L3 14Z"></path>
+                    </svg>
+                </button>
+            </div>
 
-        <div id="buttons" class="flex justify-center gap-4">
-            <button id="back" class="w-10 h-10 bg-blue-500 hover:bg-blue-400 text-white rounded-md flex items-center justify-center cursor-pointer transition" onclick="handleButtonPressed(-2)">
-                <svg class="w-6 h-6" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6 14H8L8 9L13 14H15L15 2H13L8 7L8 2H6L0 8L6 14Z"></path>
-                </svg>
-            </button>
-            <button id="play" class="w-10 h-10 bg-blue-500 hover:bg-blue-400 text-white rounded-md flex items-center justify-center cursor-pointer transition" onclick="handleButtonPressed(1)">
-                <svg class="w-6 h-6" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M5 16L7 16L15 8L7 0L5 0L5 16Z"></path>
-                </svg>
-            </button>
-            <button id="pause" class="w-10 h-10 bg-blue-500 hover:bg-blue-400 text-white rounded-md flex items-center justify-center cursor-pointer transition hidden" onclick="handleButtonPressed(1)">
-                <svg class="w-6 h-6" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="3.5" y="1" width="2" height="14"></rect>
-                    <rect x="12" y="1" width="2" height="14"></rect>
-                </svg>
-            </button>
-            <button id="stop" class="w-10 h-10 bg-blue-500 hover:bg-blue-400 text-white rounded-md flex items-center justify-center cursor-pointer transition" onclick="handleButtonPressed(0)">
-                <svg class="w-6 h-6" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <rect x="1" y="1" width="14" height="14"></rect>
-                </svg>
-            </button>
-            <button id="next" class="w-10 h-10 bg-blue-500 hover:bg-blue-400 text-white rounded-md flex items-center justify-center cursor-pointer transition" onclick="handleButtonPressed(2)">
-                <svg class="w-6 h-6" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 14H1L1 2H3L8 7L8 2H10L16 8L10 14H8L8 9L3 14Z"></path>
-                </svg>
-            </button>
+            <div id="nowPlaying" class="text-lg font-semibold text-lime-400">
+                Now playing: <label id="songSelected"></label>
+            </div>            
         </div>
-        
 
-        <div id="nowPlaying" class="text-lg font-semibold text-lime-400">
-            Now playing: <label id="songSelected"></label>
-        </div>
+        <div class="flex flex-col gap-6 items-center">
+            <div id="mode" class="flex flex-wrap justify-center gap-4 bg-gray-800 p-4 rounded-lg shadow-lg">
+                <input type="button" value="Circles" onclick="setMode('circulos')" class="bg-blue-500 hover:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg cursor-pointer transition">
+                <input type="button" value="Lines" onclick="setMode('verticales')" class="bg-blue-500 hover:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg cursor-pointer transition">
+                <input type="button" value="Spiral" onclick="setMode('espiral')" class="bg-blue-500 hover:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg cursor-pointer transition">
+            </div>
 
-        <div id="mode" class="flex gap-4">
-            <input type="button" value="Circulos" onclick="setMode('circulos')" class="bg-blue-500 hover:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg cursor-pointer transition">
-            <input type="button" value="Lineas" onclick="setMode('verticales')" class="bg-blue-500 hover:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg cursor-pointer transition">
-            <input type="button" value="Espiral" onclick="setMode('espiral')" class="bg-blue-500 hover:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg cursor-pointer transition">
+            <div id="songListContainer" class="w-full md:w-80 text-center">
+                <h2 class="text-lg font-semibold mb-2">Available songs</h2>
+                <ul id="songList" class="bg-gray-800 rounded-lg shadow-lg p-4 text-white text-sm space-y-2 max-h-105 overflow-y-auto">
+                </ul>
+            </div>
+
+            <div class="text-center w-full md:w-auto">
+                <input type="file" id="fileInput" accept="audio/mp3" class="hidden" onchange="addNewSong(event)" multiple>
+                <button onclick="document.getElementById('fileInput').click()"
+                    class="bg-green-500 hover:bg-green-400 text-white font-medium py-2 px-4 rounded-lg cursor-pointer transition">
+                    Add Song
+                </button>
+            </div>
         </div>
     </div>
 
+    <script language="javascript" type="text/javascript" src="sketch.js"></script>
 </body>
+
 
 </html>
