@@ -1,5 +1,5 @@
 var sound = [];
-var songNames = ["Rise Up", "Yellow", "SomethingJustLikeThis", "faded", "Shots", "skrillex", "Thunder", "Whatever_It_Takes"];
+var songNames = ["RiseUp", "Yellow", "SomethingJustLikeThis", "Faded", "Shots", "Skrillex", "Thunder", "WhateverItTakes", "MedievalGamerVoice"];
 var WIDTH = 500;
 var HEIGHT = 500;
 var bgcolor = [0,0,0];
@@ -19,17 +19,20 @@ function preload () {
   	sound [5] = loadSound("sounds/" + songNames[5] + ".mp3");
   	sound [6] = loadSound("sounds/" + songNames[6] + ".mp3");
   	sound [7] = loadSound("sounds/" + songNames[7] + ".mp3");
+  	sound [8] = loadSound("sounds/" + songNames[8] + ".mp3");
   		
   	maxSongs = sound.length;
 }
 
-function setup () {    
-	canvas = createCanvas(WIDTH, HEIGHT);
-	//canvas.position(50, 50);
-	canvas.parent("canvas");
+function setup() {
+    canvas = createCanvas(WIDTH, HEIGHT);
+    canvas.parent("canvas"); 
+    canvas.style("display", "block"); 
+    canvas.style("margin", "25 auto"); 
 	fft = new p5.FFT(0.9);
 	amplitude = new p5.Amplitude();	
 }
+
 
 function draw () {
 	if (!paused) {
@@ -52,71 +55,71 @@ function draw () {
 			case 'circulos': circulos();
 							break;
 	  	}
-	  	//console.log("Bass: " + bass);
-	  	//console.log("Treble: " + treble);
-	  	//bgcolor = [bass - 50, 0, 255]; //fondo azul - rosa	  	
+	  		
 	  	bgcolor = [bass - 25, treble, 255]; //fondo azul - morado
-	  	//bgcolor = [255, bass - 25, treble]; //fondo rojo- naranja  	
 	 }  	
   	document.getElementById("songSelected").textContent = songNames[song];
 }
 
-function handleButtonPressed (num) {
-	if (num == 0) {
-		sound[song].stop();
+function handleButtonPressed(num) {
+    const playButton = document.getElementById("play");
+    const pauseButton = document.getElementById("pause");
+
+    if (num === 0) { // Stop
+        sound[song].stop();
+        paused = false;
+        playButton.classList.remove("hidden");
+        pauseButton.classList.add("hidden");
+    } else if (num === 1) { // Play / Pause toggle
+        if (sound[song].isPlaying()) {
+            sound[song].pause();
+            paused = true;
+            playButton.classList.remove("hidden");
+            pauseButton.classList.add("hidden");
+        } else {
+            sound[song].play();
+            paused = false;
+            playButton.classList.add("hidden");
+            pauseButton.classList.remove("hidden");
+        }
+    } else if (num === 2) { // Next
+        sound[song].stop();
+        if (song < maxSongs - 1) song++;
+        sound[song].play();
 		paused = false;
-	}
-	else if (num == 1) {
-		if (sound[song].isPlaying()) {
-			sound[song].pause();			
-			paused = true;
-			document.getElementById("pause").style.display = "inline";
-			document.getElementById("play").style.display = "none";
-		}
-		else {
-			sound[song].play();
-			paused = false;
-			document.getElementById("pause").style.display = "none";
-			document.getElementById("play").style.display = "inline";
-		}
-	}
-	else if (num == 2) {
-		sound[song].stop();
-		if (song < maxSongs - 1) song++;		
-		sound[song].play();
-	}
-	else {
-		sound[song].stop();
-		if (song > 0) song--;
-		sound[song].play();
-	}	
+		playButton.classList.add("hidden");
+		pauseButton.classList.remove("hidden");
+    } else { // Previous
+        sound[song].stop();
+        if (song > 0) song--;
+        sound[song].play();
+		paused = false;
+		playButton.classList.add("hidden");
+		pauseButton.classList.remove("hidden");
+    }
 }
+
 
 function setMode(string) {
 	modo = string;
 }
 
-function espiral() {
-	//Espiral
-  	//512
-  	
+function espiral() {  	
   	var newSpectrum = [];
   	for (var i = 0; i < spectrum.length; i = i + 2) {
   		newSpectrum.push((spectrum[i] + spectrum[i + 1]) / 2);
   	} 
 
-  	//256
 	var newSpectrum2 = [];
   	for (var i = 0; i < newSpectrum.length; i = i + 2) {
   		newSpectrum2.push((newSpectrum[i] + newSpectrum[i + 1]) / 2);
   	}
 
-  	//128 
   	var newSpectrum3 = [];
   	for (var i = 0; i < newSpectrum2.length; i = i + 2) {
   		newSpectrum3.push((newSpectrum2[i] + newSpectrum2[i + 1]) / 2);
   	}   	
-  	//shuffle(newSpectrum3);
+
   	var X = 11;
   	var Y = 10;
 	var x = 0;
@@ -125,10 +128,8 @@ function espiral() {
     var dy = -1;
 
     for (var i = 0; i < Math.max(X,Y) ** 2; i++) {	    
-        if ((-X/2 < x <= X/2) && (-Y/2 < y <= Y/2)) {
-            //var radius = map(newSpectrum3[Math.abs(x * y * 5)], 50 , 250, 0, 60); //Radio pequeño
-            //var radius = map(newSpectrum3[Math.abs(x * y * 5)], 0 , 250, 0, 60); //Radio 0
-            var radius = map(newSpectrum3[Math.abs(x * y * 5)], 100 , 300, 10, 60); //Radio pequenyo mas molon aparentemente
+        if ((-X/2 < x <= X/2) && (-Y/2 < y <= Y/2)) {            
+            var radius = map(newSpectrum3[Math.abs(x * y * 5)], 100 , 300, 10, 60); 
 			var color = map(newSpectrum3[Math.abs(x * y * 5)], 0 , 250, 0, 255);
 
 			if (Math.abs(y) - 2 < 0 && Math.abs(x) - 2 < 0) {
@@ -160,7 +161,6 @@ function espiral() {
 }
 
 function circulos() {
-	//Pantalla llena de circulos
 	stroke(0);
   	var x = 0;
   	var y = 50;
@@ -168,7 +168,6 @@ function circulos() {
   	for (var i = 0; i < spectrum.length; i++) {	  		
   		var radius = map(spectrum[i], 0 , 255, 0, 50);
   		var color = map(spectrum[i], 0 , 255, 0, x);
-  		//console.log("Spectrum: " + spectrum[i]);
 		if (x == WIDTH - 50 && y == HEIGHT - 50) todosDibujados = true;
 
   		if (!todosDibujados) {
@@ -192,7 +191,6 @@ function circulos() {
 }
 
 function lineasVerticales() {
-	//Lineas verticales
   	for (var i = 0; i < spectrum.length; i++) {
   		var h = map(spectrum[i], 0 , 255, 0, HEIGHT);  		 		
   		stroke(255 - h, 255 - h, 255);
