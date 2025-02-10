@@ -1,5 +1,5 @@
 var sound = [];
-var songNames = ["RiseUp", "Yellow", "SomethingJustLikeThis", "Faded", "Shots", "Skrillex", "Thunder", "WhateverItTakes", "MedievalGamerVoice"];
+var songNames = ["RiseUp", "Yellow", "SomethingJustLikeThis", "Shots", "Thunder", "WhateverItTakes", "MedievalGamerVoice"];
 var WIDTH = 500;
 var HEIGHT = 500;
 var bgcolor = [0,0,0];
@@ -18,8 +18,6 @@ function preload () {
   	sound [4] = loadSound("sounds/" + songNames[4] + ".mp3");
   	sound [5] = loadSound("sounds/" + songNames[5] + ".mp3");
   	sound [6] = loadSound("sounds/" + songNames[6] + ".mp3");
-  	sound [7] = loadSound("sounds/" + songNames[7] + ".mp3");
-  	sound [8] = loadSound("sounds/" + songNames[8] + ".mp3");
   		
   	maxSongs = sound.length;
 }
