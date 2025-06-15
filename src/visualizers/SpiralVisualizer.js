@@ -6,7 +6,7 @@ class SpiralVisualizer extends BaseVisualizer {
     update(spectrum) {
         const newSpectrum = this._reduceSpectrum(spectrum, 3);
         const X = 11;
-        const Y = 10;
+        const Y = 11;
         let x = 0;
         let y = 0;
         let dx = 0;
