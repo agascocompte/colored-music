@@ -1,15 +1,9 @@
-class Visualizers {
+class SpiralVisualizer extends BaseVisualizer {
     constructor(width, height) {
-        this.WIDTH = width;
-        this.HEIGHT = height;
-        this.bgcolor = [0, 0, 0];
+        super(width, height);
     }
 
-    updateBackground(bass, treble) {
-        this.bgcolor = [bass - 25, treble, 255];
-    }
-
-    espiral(spectrum) {
+    update(spectrum) {
         const newSpectrum = this._reduceSpectrum(spectrum, 3);
         const X = 11;
         const Y = 10;
@@ -32,44 +26,6 @@ class Visualizers {
             }
             x += dx;
             y += dy;
-        }
-    }
-
-    circulos(spectrum) {
-        stroke(0);
-        let x = 0;
-        let y = 50;
-        let todosDibujados = false;
-
-        for (let i = 0; i < spectrum.length; i++) {
-            const radius = map(spectrum[i], 0, 255, 0, 50);
-            const color = map(spectrum[i], 0, 255, 0, x);
-
-            if (x == this.WIDTH - 50 && y == this.HEIGHT - 50) {
-                todosDibujados = true;
-            }
-
-            if (!todosDibujados) {
-                if (x == this.WIDTH - 50) {
-                    x = 50;
-                    y += 50;
-                } else {
-                    x += 50;
-                }
-            } else {
-                x = this.WIDTH + (radius * 4);
-            }
-
-            this._setCirculosColor(spectrum[i], color);
-            ellipse(x, y, radius, radius);
-        }
-    }
-
-    lineasVerticales(spectrum) {
-        for (let i = 0; i < spectrum.length; i++) {
-            const h = map(spectrum[i], 0, 255, 0, this.HEIGHT);
-            stroke(255 - h, 255 - h, 255);
-            line(i, this.HEIGHT, i, this.HEIGHT - h);
         }
     }
 
@@ -102,16 +58,6 @@ class Visualizers {
         } else {
             stroke(255 - color, 255 - ((x * y) * 3), 0);
             fill(255 - color, 255 - ((x * y) * 3), 0);
-        }
-    }
-
-    _setCirculosColor(spectrumValue, color) {
-        if (spectrumValue > 150 && spectrumValue < 200) {
-            fill(255, 255 - color, 255 - color);
-        } else if (spectrumValue > 200) {
-            fill(255, color, 255 - color);
-        } else {
-            fill(255, 255 - color, 255);
         }
     }
 } 

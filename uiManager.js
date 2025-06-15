@@ -121,6 +121,10 @@ class UIManager {
 
     setMode(mode) {
         this.currentMode = mode;
+        // Marcar que se necesita reiniciar el visualizador Rainbow
+        if (mode === 'rainbow') {
+            visualizers[mode].needsReset = true;
+        }
     }
 
     getCurrentMode() {
