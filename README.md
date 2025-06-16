@@ -7,7 +7,7 @@
 ## Features
 
 - 🎵 Play, pause, stop, and switch between songs.
-- 🎨 Three visualization modes: Circles, Lines, and Spiral.
+- 🎨 Six visualization modes: Circles, Lines, Spiral, Dance, Rainbow and Mesh.
 - 🎶 Supports loading custom MP3 files.
 - 📜 Scrollable and interactive song list.
 - 🔥 Dynamic color changes based on music intensity.
