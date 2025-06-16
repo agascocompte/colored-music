@@ -23,7 +23,9 @@ class FlyingMeshVisualizer extends BaseVisualizer {
 
     update(spectrum) {
         // Usar la energía del audio para modular el terreno
-        const energy = spectrum ? spectrum.reduce((a, b) => a + b, 0) / spectrum.length : 0;
+        const energy = spectrum.reduce((a, b) => a + b, 0) / spectrum.length;
+        const dynamicRange = map(energy, 0, 255, 30, 60);
+
         this.flying -= 0.001 + map(energy, 0, 255, 0, 0.1);
         let yoff = this.flying;
         
@@ -31,7 +33,7 @@ class FlyingMeshVisualizer extends BaseVisualizer {
         for (let y = 0; y < this.rows; y++) {
             let xoff = 0;
             for (let x = 0; x < this.cols; x++) {
-                let audioMod = spectrum ? map(spectrum[x % spectrum.length], 0, 255, -30, 30) : 0;
+                let audioMod = map(spectrum[x % spectrum.length], 0, 255, -dynamicRange, dynamicRange);
                 this.terrain[x][y] = map(noise(xoff, yoff), 0, 1, -30, 30) + audioMod;
                 xoff += 0.2;
             }
