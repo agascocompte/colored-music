@@ -1,9 +1,9 @@
 class FlyingMeshVisualizer extends BaseVisualizer {
     constructor(width, height) {
         super(width, height);
-        this.cols = 60;
-        this.rows = 60;
-        this.scale = 6;
+        this.cols = 50;
+        this.rows = 50;
+        this.scale = 7;
         this.flying = 0;
         this.terrain = [];
         this.rotation = 0;

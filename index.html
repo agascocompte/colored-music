@@ -9,29 +9,33 @@
         const isGitHubPages = window.location.hostname.includes('github.io');
         const baseUrl = isGitHubPages ? '/colored-music/' : '';
         
-        // Función para cargar scripts dinámicamente
-        function loadScript(src) {
+        // Lista de scripts en orden (ajusta los nombres a minúsculas si es necesario)
+        const scripts = [
+            'libraries/p5.js',
+            'libraries/p5.dom.js',
+            'libraries/p5.sound.js',
+            'src/managers/audiomanager.js',
+            'src/visualizers/basevisualizer.js',
+            'src/visualizers/rainbowvisualizer.js',
+            'src/visualizers/dancevisualizer.js',
+            'src/visualizers/spiralvisualizer.js',
+            'src/visualizers/circlesvisualizer.js',
+            'src/visualizers/verticallinesvisualizer.js',
+            'src/visualizers/flyingmeshvisualizer.js',
+            'src/managers/uimanager.js',
+            'src/sketch.js'
+        ];
+
+        function loadScriptsSequentially(index = 0) {
+            if (index >= scripts.length) return;
             const script = document.createElement('script');
-            script.src = baseUrl + src;
+            script.src = baseUrl + scripts[index];
             script.type = 'text/javascript';
+            script.onload = () => loadScriptsSequentially(index + 1);
             document.head.appendChild(script);
         }
-    </script>
-    <script>
-        // Cargar todos los scripts en orden
-        loadScript('libraries/p5.js');
-        loadScript('libraries/p5.dom.js');
-        loadScript('libraries/p5.sound.js');
-        loadScript('src/managers/audioManager.js');
-        loadScript('src/visualizers/baseVisualizer.js');
-        loadScript('src/visualizers/rainbowVisualizer.js');
-        loadScript('src/visualizers/danceVisualizer.js');
-        loadScript('src/visualizers/spiralVisualizer.js');
-        loadScript('src/visualizers/circlesVisualizer.js');
-        loadScript('src/visualizers/verticalLinesVisualizer.js');
-        loadScript('src/visualizers/flyingMeshVisualizer.js');
-        loadScript('src/managers/uiManager.js');
-        loadScript('src/sketch.js');
+
+        loadScriptsSequentially();
     </script>
     <title>Colored Music</title>
     <style>
@@ -58,6 +62,7 @@
         }
 
     </style>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8E%B6%3C/text%3E%3C/svg%3E">
 </head>
 
 <body class="bg-gray-900 text-white font-sans min-h-screen flex flex-col items-center justify-center">

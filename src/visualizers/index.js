@@ -1,9 +1,9 @@
-import { BaseVisualizer } from './BaseVisualizer';
-import { RainbowVisualizer } from './RainbowVisualizer';
-import { DanceVisualizer } from './DanceVisualizer';
-import { SpiralVisualizer } from './SpiralVisualizer';
-import { CirclesVisualizer } from './CirclesVisualizer';
-import { VerticalLinesVisualizer } from './VerticalLinesVisualizer';
+import { BaseVisualizer } from './baseVisualizer';
+import { RainbowVisualizer } from './rainbowVisualizer';
+import { DanceVisualizer } from './danceVisualizer';
+import { SpiralVisualizer } from './spiralVisualizer';
+import { CirclesVisualizer } from './circlesVisualizer';
+import { VerticalLinesVisualizer } from './verticalLinesVisualizer';
 
 export {
     BaseVisualizer,
