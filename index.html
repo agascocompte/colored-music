@@ -4,19 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-    <script language="javascript" type="text/javascript" src="libraries/p5.js"></script>
-    <script language="javascript" type="text/javascript" src="libraries/p5.dom.js"></script>
-    <script language="javascript" type="text/javascript" src="libraries/p5.sound.js"></script>
-    <script language="javascript" type="text/javascript" src="src/managers/audioManager.js"></script>
-    <script language="javascript" type="text/javascript" src="src/visualizers/baseVisualizer.js"></script>
-    <script language="javascript" type="text/javascript" src="src/visualizers/rainbowVisualizer.js"></script>
-    <script language="javascript" type="text/javascript" src="src/visualizers/danceVisualizer.js"></script>
-    <script language="javascript" type="text/javascript" src="src/visualizers/spiralVisualizer.js"></script>
-    <script language="javascript" type="text/javascript" src="src/visualizers/circlesVisualizer.js"></script>
-    <script language="javascript" type="text/javascript" src="src/visualizers/verticalLinesVisualizer.js"></script>
-    <script language="javascript" type="text/javascript" src="src/visualizers/flyingMeshVisualizer.js"></script>
-    <script language="javascript" type="text/javascript" src="src/managers/uiManager.js"></script>
-    <script language="javascript" type="text/javascript" src="src/sketch.js"></script>
+    <script>
+        // Determinar si estamos en GitHub Pages o en local
+        const isGitHubPages = window.location.hostname.includes('github.io');
+        const baseUrl = isGitHubPages ? '/colored-music/' : '';
+        
+        // Función para cargar scripts dinámicamente
+        function loadScript(src) {
+            const script = document.createElement('script');
+            script.src = baseUrl + src;
+            script.type = 'text/javascript';
+            document.head.appendChild(script);
+        }
+    </script>
+    <script>
+        // Cargar todos los scripts en orden
+        loadScript('libraries/p5.js');
+        loadScript('libraries/p5.dom.js');
+        loadScript('libraries/p5.sound.js');
+        loadScript('src/managers/audioManager.js');
+        loadScript('src/visualizers/baseVisualizer.js');
+        loadScript('src/visualizers/rainbowVisualizer.js');
+        loadScript('src/visualizers/danceVisualizer.js');
+        loadScript('src/visualizers/spiralVisualizer.js');
+        loadScript('src/visualizers/circlesVisualizer.js');
+        loadScript('src/visualizers/verticalLinesVisualizer.js');
+        loadScript('src/visualizers/flyingMeshVisualizer.js');
+        loadScript('src/managers/uiManager.js');
+        loadScript('src/sketch.js');
+    </script>
     <title>Colored Music</title>
     <style>
         #p5_loading {
