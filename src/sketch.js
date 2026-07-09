@@ -45,8 +45,8 @@ function setup() {
     visualizers = {
         espiral: new SpiralVisualizer(WIDTH, HEIGHT),
         verticales: new VerticalLinesVisualizer(WIDTH, HEIGHT),
-        circulos: new CirclesVisualizer(WIDTH, HEIGHT),
-        dance: new DanceVisualizer(WIDTH, HEIGHT),
+        nebula: new NebulaVisualizer(WIDTH, HEIGHT),
+        aurora: new AuroraVisualizer(WIDTH, HEIGHT),
         rainbow: new RainbowVisualizer(WIDTH, HEIGHT),
         flyingmesh: new FlyingMeshVisualizer(WIDTH, HEIGHT)
     };
@@ -79,7 +79,8 @@ function draw() {
             const highMid = audioManager.getEnergy("highMid");
             const treble = audioManager.getEnergy("treble");
             visualizers[currentMode].update(spectrum);
-            if (currentMode !== 'dance' && currentMode !== 'rainbow') {
+            // Nebula, Aurora y Rainbow pintan su propio fondo
+            if (currentMode !== 'nebula' && currentMode !== 'aurora' && currentMode !== 'rainbow') {
                 visualizers[currentMode].updateBackground(bass, treble);
             }
         }

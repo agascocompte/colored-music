@@ -1,15 +1,17 @@
 import { BaseVisualizer } from './baseVisualizer';
 import { RainbowVisualizer } from './rainbowVisualizer';
-import { DanceVisualizer } from './danceVisualizer';
+import { AuroraVisualizer } from './auroraVisualizer';
 import { SpiralVisualizer } from './spiralVisualizer';
-import { CirclesVisualizer } from './circlesVisualizer';
+import { NebulaVisualizer } from './nebulaVisualizer';
 import { VerticalLinesVisualizer } from './verticalLinesVisualizer';
+import { FlyingMeshVisualizer } from './flyingMeshVisualizer';
 
 export {
     BaseVisualizer,
     RainbowVisualizer,
-    DanceVisualizer,
+    AuroraVisualizer,
     SpiralVisualizer,
-    CirclesVisualizer,
-    VerticalLinesVisualizer
-}; 
+    NebulaVisualizer,
+    VerticalLinesVisualizer,
+    FlyingMeshVisualizer
+};
