@@ -29,7 +29,22 @@ class AudioManager {
         return this.fft.getEnergy(band);
     }
 
+    _ensureAudioRunning() {
+        // iOS mantiene el AudioContext suspendido hasta que un gesto del
+        // usuario lo reanuda explícitamente; sin esto no suena en iPhone
+        if (typeof getAudioContext !== 'function') return;
+        const ctx = getAudioContext();
+        if (ctx && ctx.state !== 'running') {
+            if (typeof userStartAudio === 'function') {
+                userStartAudio();
+            } else {
+                ctx.resume();
+            }
+        }
+    }
+
     play() {
+        this._ensureAudioRunning();
         if (this.sound[this.currentSong].isPlaying()) {
             this.sound[this.currentSong].pause();
             this.paused = true;
@@ -46,6 +61,7 @@ class AudioManager {
     }
 
     next() {
+        this._ensureAudioRunning();
         this.sound[this.currentSong].stop();
         if (this.currentSong < this.maxSongs - 1) {
             this.currentSong++;
@@ -55,6 +71,7 @@ class AudioManager {
     }
 
     previous() {
+        this._ensureAudioRunning();
         this.sound[this.currentSong].stop();
         if (this.currentSong > 0) {
             this.currentSong--;
@@ -64,6 +81,7 @@ class AudioManager {
     }
 
     selectSong(index) {
+        this._ensureAudioRunning();
         if (index >= 0 && index < this.songNames.length) {
             this.sound[this.currentSong].stop();
             this.currentSong = index;
