@@ -1,5 +1,13 @@
-const WIDTH = 500;
-const HEIGHT = 500;
+let WIDTH = 500;
+let HEIGHT = 500;
+
+function computeCanvasSize() {
+    const container = document.getElementById("canvas");
+    if (!container) return 500;
+    // Ajustar al contenedor y a la altura de la ventana, dejando sitio para los controles
+    const size = Math.min(container.clientWidth, window.innerHeight - 240, 680);
+    return Math.max(320, Math.floor(size));
+}
 
 let audioManager;
 let visualizers;
@@ -17,14 +25,21 @@ function recreateCanvas() {
     if (window.canvas) {
         window.canvas.remove();
     }
+    // Ajustar la tarjeta contenedora al tamaño real del canvas
+    const container = document.getElementById("canvas");
+    if (container) {
+        container.style.width = WIDTH + "px";
+        container.style.height = HEIGHT + "px";
+    }
     window.canvas = createCanvas(WIDTH, HEIGHT, P2D);
     window.canvas.parent("canvas");
     window.canvas.style("display", "block");
-    window.canvas.style("margin", "25 auto");
+    window.canvas.style("margin", "0 auto");
     isChangingMode = false;
 }
 
 function setup() {
+    WIDTH = HEIGHT = computeCanvasSize();
     recreateCanvas();
     audioManager.setup();
     visualizers = {

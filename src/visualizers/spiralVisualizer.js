@@ -7,6 +7,8 @@ class SpiralVisualizer extends BaseVisualizer {
         const newSpectrum = this._reduceSpectrum(spectrum, 3);
         const X = 11;
         const Y = 11;
+        const spacing = this.WIDTH / X;
+        const sizeScale = this.WIDTH / 550;
         let x = 0;
         let y = 0;
         let dx = 0;
@@ -14,11 +16,11 @@ class SpiralVisualizer extends BaseVisualizer {
 
         for (let i = 0; i < Math.max(X, Y) ** 2; i++) {
             if ((-X/2 < x && x <= X/2) && (-Y/2 < y && y <= Y/2)) {
-                const radius = map(newSpectrum[Math.abs(x * y * 5) % newSpectrum.length], 100, 300, 10, 60);
+                const radius = map(newSpectrum[Math.abs(x * y * 5) % newSpectrum.length], 100, 300, 10, 60) * sizeScale;
                 const color = map(newSpectrum[Math.abs(x * y * 5) % newSpectrum.length], 0, 250, 0, 255);
 
                 this._setEspiralColor(x, y, color);
-                ellipse((x * 50) + (this.WIDTH / 2), (y * 50) + (this.HEIGHT / 2), radius, radius);
+                ellipse((x * spacing) + (this.WIDTH / 2), (y * spacing) + (this.HEIGHT / 2), radius, radius);
             }
 
             if (x == y || (x < 0 && x == -y) || (x > 0 && x == 1-y)) {

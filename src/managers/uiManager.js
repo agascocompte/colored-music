@@ -6,8 +6,9 @@ class UIManager {
 
     setup() {
         this.populateSongList();
-        this.setupEventListeners();
         this.setupSearch();
+        this.updateModePills();
+        this.showTab('library');
     }
 
     populateSongList() {
@@ -17,10 +18,11 @@ class UIManager {
         this.audioManager.songNames.forEach((songName, index) => {
             let li = document.createElement("li");
             li.textContent = songName.replace(/_/g, " ");
-            li.classList.add("cursor-pointer", "hover:bg-blue-500", "p-2", "rounded-md", "transition");
+            li.title = songName.replace(/_/g, " ");
+            li.classList.add("cursor-pointer", "hover:bg-slate-800", "px-3", "py-2", "rounded-lg", "transition", "truncate");
 
             if (index === this.audioManager.currentSong) {
-                li.classList.add("text-green-400", "font-semibold");
+                li.classList.add("text-blue-400", "font-semibold", "bg-slate-800/60");
             }
 
             li.onclick = () => this.selectSong(index);
@@ -28,72 +30,24 @@ class UIManager {
         });
     }
 
-    setupEventListeners() {
-        // Primero removemos los event listeners existentes
-        const playButton = document.getElementById("play");
-        const pauseButton = document.getElementById("pause");
-        const stopButton = document.getElementById("stop");
-        const nextButton = document.getElementById("next");
-        const prevButton = document.getElementById("previous");
-
-        // Verificamos que todos los botones existan
-        if (!playButton || !pauseButton || !stopButton || !nextButton || !prevButton) {
-            console.warn("Algunos botones no están disponibles en el DOM");
-            return;
-        }
-
-        // Clonamos los botones para remover todos los event listeners
-        const newPlayButton = playButton.cloneNode(true);
-        const newPauseButton = pauseButton.cloneNode(true);
-        const newStopButton = stopButton.cloneNode(true);
-        const newNextButton = nextButton.cloneNode(true);
-        const newPrevButton = prevButton.cloneNode(true);
-
-        // Reemplazamos los botones viejos con los nuevos
-        playButton.parentNode.replaceChild(newPlayButton, playButton);
-        pauseButton.parentNode.replaceChild(newPauseButton, pauseButton);
-        stopButton.parentNode.replaceChild(newStopButton, stopButton);
-        nextButton.parentNode.replaceChild(newNextButton, nextButton);
-        prevButton.parentNode.replaceChild(newPrevButton, prevButton);
-
-        // Añadimos los nuevos event listeners
-        newPlayButton.addEventListener("click", () => this.handleButtonPressed(1));
-        newPauseButton.addEventListener("click", () => this.handleButtonPressed(1));
-        newStopButton.addEventListener("click", () => this.handleButtonPressed(0));
-        newNextButton.addEventListener("click", () => this.handleButtonPressed(2));
-        newPrevButton.addEventListener("click", () => this.handleButtonPressed(3));
-    }
-
     handleButtonPressed(num) {
-        const playButton = document.getElementById("play");
-        const pauseButton = document.getElementById("pause");
-
         switch (num) {
             case 0: // Stop
                 this.audioManager.stop();
-                playButton.classList.remove("hidden");
-                pauseButton.classList.add("hidden");
+                this.updatePlayState(false);
                 break;
             case 1: // Play / Pause
                 const isPaused = this.audioManager.play();
-                if (isPaused) {
-                    playButton.classList.remove("hidden");
-                    pauseButton.classList.add("hidden");
-                } else {
-                    playButton.classList.add("hidden");
-                    pauseButton.classList.remove("hidden");
-                }
+                this.updatePlayState(!isPaused);
                 break;
             case 2: // Next
                 this.audioManager.next();
-                playButton.classList.add("hidden");
-                pauseButton.classList.remove("hidden");
+                this.updatePlayState(true);
                 this.highlightCurrentSong();
                 break;
             case 3: // Previous
                 this.audioManager.previous();
-                playButton.classList.add("hidden");
-                pauseButton.classList.remove("hidden");
+                this.updatePlayState(true);
                 this.highlightCurrentSong();
                 break;
         }
@@ -101,13 +55,21 @@ class UIManager {
         document.getElementById("songSelected").textContent = this.audioManager.getCurrentSongName();
     }
 
+    updatePlayState(isPlaying) {
+        document.getElementById("play").classList.toggle("hidden", isPlaying);
+        document.getElementById("pause").classList.toggle("hidden", !isPlaying);
+
+        const eq = document.getElementById("eq");
+        if (eq) eq.classList.toggle("paused", !isPlaying);
+    }
+
     highlightCurrentSong() {
         let items = document.querySelectorAll("#songList li");
         items.forEach((li, index) => {
             if (index === this.audioManager.currentSong) {
-                li.classList.add("text-green-400", "font-semibold");
+                li.classList.add("text-blue-400", "font-semibold", "bg-slate-800/60");
             } else {
-                li.classList.remove("text-green-400", "font-semibold");
+                li.classList.remove("text-blue-400", "font-semibold", "bg-slate-800/60");
             }
         });
     }
@@ -115,21 +77,45 @@ class UIManager {
     selectSong(index) {
         this.audioManager.selectSong(index);
         document.getElementById("songSelected").textContent = this.audioManager.getCurrentSongName();
-        document.getElementById("pause").classList.remove("hidden");
-        document.getElementById("play").classList.add("hidden");
+        this.updatePlayState(true);
         this.highlightCurrentSong();
     }
 
     setMode(mode) {
         this.currentMode = mode;
+        this.updateModePills();
         // Marcar que se necesita reiniciar el visualizador Rainbow
         if (mode === 'rainbow') {
             visualizers[mode].needsReset = true;
         }
     }
 
+    updateModePills() {
+        document.querySelectorAll("#mode .mode-pill").forEach(pill => {
+            pill.classList.toggle("active", pill.dataset.mode === this.currentMode);
+        });
+    }
+
     getCurrentMode() {
         return this.currentMode;
+    }
+
+    showTab(name) {
+        const libraryPanel = document.getElementById("libraryPanel");
+        const searchPanel = document.getElementById("searchPanel");
+        const tabLibrary = document.getElementById("tabLibrary");
+        const tabSearch = document.getElementById("tabSearch");
+
+        const showLibrary = name === 'library';
+        libraryPanel.classList.toggle("hidden", !showLibrary);
+        searchPanel.classList.toggle("hidden", showLibrary);
+        searchPanel.classList.toggle("flex", !showLibrary);
+        tabLibrary.classList.toggle("active", showLibrary);
+        tabSearch.classList.toggle("active", !showLibrary);
+
+        if (!showLibrary) {
+            document.getElementById("searchInput").focus();
+        }
     }
 
     setupSearch() {
@@ -153,7 +139,7 @@ class UIManager {
         if (!query) return;
 
         resultsList.classList.remove("hidden");
-        resultsList.innerHTML = '<li class="p-2 text-gray-400">Searching...</li>';
+        resultsList.innerHTML = '<li class="p-2 text-slate-400">Searching...</li>';
 
         try {
             const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=10`);
@@ -169,18 +155,18 @@ class UIManager {
         resultsList.innerHTML = "";
 
         if (!results.length) {
-            resultsList.innerHTML = '<li class="p-2 text-gray-400">No results found.</li>';
+            resultsList.innerHTML = '<li class="p-2 text-slate-400">No results found.</li>';
             return;
         }
 
         results.forEach((track) => {
             const li = document.createElement("li");
-            li.classList.add("cursor-pointer", "hover:bg-blue-500", "p-2", "rounded-md", "transition", "flex", "items-center", "gap-3", "text-left");
+            li.classList.add("cursor-pointer", "hover:bg-slate-800", "px-2", "py-2", "rounded-lg", "transition", "flex", "items-center", "gap-3", "text-left");
 
             const artwork = document.createElement("img");
             artwork.src = track.artworkUrl60;
             artwork.alt = "";
-            artwork.classList.add("w-10", "h-10", "rounded");
+            artwork.classList.add("w-10", "h-10", "rounded-md", "shrink-0");
 
             const info = document.createElement("div");
             info.classList.add("flex-1", "min-w-0");
@@ -191,7 +177,7 @@ class UIManager {
 
             const artist = document.createElement("div");
             artist.textContent = track.artistName;
-            artist.classList.add("text-gray-400", "text-xs", "truncate");
+            artist.classList.add("text-slate-400", "text-xs", "truncate");
 
             info.appendChild(title);
             info.appendChild(artist);
@@ -240,4 +226,4 @@ class UIManager {
 
         this.populateSongList();
     }
-} 
+}
