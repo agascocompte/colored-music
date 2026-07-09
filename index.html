@@ -43,22 +43,26 @@
             display: none;
         }
 
-        #songList::-webkit-scrollbar {
-            width: 8px; 
+        #songList::-webkit-scrollbar,
+        #searchResults::-webkit-scrollbar {
+            width: 8px;
         }
 
-        #songList::-webkit-scrollbar-track {
+        #songList::-webkit-scrollbar-track,
+        #searchResults::-webkit-scrollbar-track {
             background: #1e293b;
             border-radius: 8px;
         }
 
-        #songList::-webkit-scrollbar-thumb {
-            background: #2563eb; 
+        #songList::-webkit-scrollbar-thumb,
+        #searchResults::-webkit-scrollbar-thumb {
+            background: #2563eb;
             border-radius: 8px;
         }
 
-        #songList::-webkit-scrollbar-thumb:hover {
-            background: #60a5fa; 
+        #songList::-webkit-scrollbar-thumb:hover,
+        #searchResults::-webkit-scrollbar-thumb:hover {
+            background: #60a5fa;
         }
 
     </style>
@@ -116,6 +120,20 @@
                 <input type="button" value="Dance" onclick="setMode('dance')" class="bg-purple-500 hover:bg-purple-400 text-white font-medium py-2 px-4 rounded-lg cursor-pointer transition">
                 <input type="button" value="Rainbow" onclick="setMode('rainbow')" class="bg-purple-500 hover:bg-purple-400 text-white font-medium py-2 px-4 rounded-lg cursor-pointer transition">
                 <input type="button" value="Flying Mesh" onclick="setMode('flyingmesh')" class="bg-green-500 hover:bg-green-400 text-white font-medium py-2 px-4 rounded-lg cursor-pointer transition">
+            </div>
+
+            <div id="searchContainer" class="w-full md:w-80 text-center">
+                <h2 class="text-lg font-semibold mb-2">Search songs</h2>
+                <div class="flex gap-2">
+                    <input type="text" id="searchInput" placeholder="Song or artist..."
+                        class="flex-1 min-w-0 bg-gray-800 text-white text-sm rounded-lg px-3 py-2 shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400">
+                    <button id="searchButton"
+                        class="bg-blue-500 hover:bg-blue-400 text-white font-medium py-2 px-4 rounded-lg cursor-pointer transition">
+                        Search
+                    </button>
+                </div>
+                <ul id="searchResults" class="hidden bg-gray-800 rounded-lg shadow-lg p-4 mt-2 text-white text-sm space-y-2 max-h-60 overflow-y-auto"></ul>
+                <p class="text-xs text-gray-400 mt-1">30-second previews via iTunes</p>
             </div>
 
             <div id="songListContainer" class="w-full md:w-80 text-center">

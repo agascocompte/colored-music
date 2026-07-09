@@ -85,6 +85,20 @@ class AudioManager {
         this.maxSongs = this.sound.length;
     }
 
+    addRemoteSong(displayName, url, onReady, onError) {
+        loadSound(url,
+            (loadedSound) => {
+                this.sound.push(loadedSound);
+                this.songNames.push(displayName);
+                this.maxSongs = this.sound.length;
+                onReady(this.sound.length - 1);
+            },
+            (error) => {
+                if (onError) onError(error);
+            }
+        );
+    }
+
     getCurrentSongName() {
         return this.songNames[this.currentSong];
     }
