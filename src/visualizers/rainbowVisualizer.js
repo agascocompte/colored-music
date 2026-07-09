@@ -1,215 +1,306 @@
 class RainbowVisualizer extends BaseVisualizer {
     constructor(width, height) {
         super(width, height);
-        this.reset();
-        this.rainbowWaves = [];
-        this.lastEnergyChange = 0;
         this.needsReset = true;
-        this._initializeRainbowWaves();
+        this.cx = width / 2;
+        this.cy = height * 0.92;
+
+        // Un arco por color, cada uno ligado a su propia banda de frecuencia
+        // (rojo = graves exteriores ... violeta = agudos interiores)
+        this.bands = [
+            { hue: 0,   f0: 0,   f1: 8 },
+            { hue: 28,  f0: 8,   f1: 20 },
+            { hue: 55,  f0: 20,  f1: 45 },
+            { hue: 125, f0: 45,  f1: 90 },
+            { hue: 200, f0: 90,  f1: 150 },
+            { hue: 245, f0: 150, f1: 240 },
+            { hue: 285, f0: 240, f1: 380 }
+        ];
+
+        this.stars = [];
+        this.sparkles = [];
+        this.glints = [];
+        this.drops = [];
+        this.levels = new Array(this.bands.length).fill(0);
+        this.lastEnergy = 0;
+        this.skyGlow = 0;
+        this.beatPulse = 0;
+        this.reset();
     }
 
     reset() {
-        this.colorShift = 0;
-        this.colorChangeThreshold = 50;
-        this.rainbowWaves = [];
-        this.maxRainbowWaves = 6;
-        this.particles = [];
-        this.maxParticles = 30;
-        this.shockwaves = [];
         this.time = 0;
-        this._initializeRainbowWaves();
-    }
+        this.glints = [];
+        this.drops = [];
+        this.levels = new Array(this.bands.length).fill(0);
+        this.skyGlow = 0;
+        this.beatPulse = 0;
 
-    _initializeRainbowWaves() {
-        // Reiniciar las ondas con colores del arcoíris
-        this.rainbowWaves = [];
-        const baseColors = [
-            color(255, 0, 0),     // Rojo
-            color(255, 127, 0),   // Naranja
-            color(255, 255, 0),   // Amarillo
-            color(0, 255, 0),     // Verde
-            color(0, 0, 255),     // Azul
-            color(75, 0, 130)     // Índigo
-        ];
+        this.stars = [];
+        for (let i = 0; i < 90; i++) {
+            this.stars.push({
+                x: random(this.WIDTH),
+                y: random(this.HEIGHT * 0.5),
+                size: random(0.5, 2),
+                phase: random(TWO_PI),
+                speed: random(0.5, 2)
+            });
+        }
 
-        for (let i = 0; i < this.maxRainbowWaves; i++) {
-            this.rainbowWaves.push({
-                radius: 50 + i * 60,
-                color: baseColors[i % baseColors.length],
-                speed: 0.05 + i * 0.02,
-                phase: i * PI / 4,
-                amplitude: 3 + i * 1,
-                frequency: 0.5 + i * 0.1,
-                baseRadius: 50 + i * 60,
-                smoothRadius: 50 + i * 60
+        this.sparkles = [];
+        for (let i = 0; i < 44; i++) {
+            this.sparkles.push({
+                angle: random(PI + 0.2, TWO_PI - 0.2),
+                band: floor(random(this.bands.length)),
+                drift: random(-0.005, 0.005),
+                phase: random(TWO_PI),
+                speed: random(1.5, 3.5)
             });
         }
     }
 
     update(spectrum) {
-        // Asegurarnos de que el visualizador está inicializado
-        if (this.rainbowWaves.length === 0) {
-            this.reset();
-        }
+        this.time += 0.016;
 
-        this.time += 0.05;
-        
-        const bass = this._getAverageEnergy(spectrum, 0, 10);
-        const lowMid = this._getAverageEnergy(spectrum, 10, 50);
-        const mid = this._getAverageEnergy(spectrum, 50, 100);
-        const highMid = this._getAverageEnergy(spectrum, 100, 200);
-        const treble = this._getAverageEnergy(spectrum, 200, 255);
-        
-        this.energyLevel = (bass + lowMid + mid + highMid + treble) / 5;
-        this._detectTempo(bass, mid);
-        
-        this._updateRainbowWaves(spectrum, bass, lowMid, mid, highMid, treble);
+        const bass = this._getAverageEnergy(spectrum, 0, 12);
+        const mid = this._getAverageEnergy(spectrum, 40, 120);
+        const treble = this._getAverageEnergy(spectrum, 200, 400);
+        const energy = (bass * 1.2 + mid + treble * 0.8) / 3;
+
+        this._detectBeat(energy);
+        this._updateLevels(spectrum);
+
+        push();
+        colorMode(HSB, 360, 100, 100, 100);
+        noStroke();
+
+        this._drawSky(bass);
+        this._drawStars(treble);
+        this._drawSunGlow(bass);
+        this._drawRainbow(energy);
+        this._updateDrops();
+        this._drawGlints();
+        this._drawSparkles(treble);
+        this._drawClouds(mid);
+
+        pop();
+        colorMode(RGB, 255, 255, 255, 255);
+
+        this.skyGlow = lerp(this.skyGlow, 0, 0.05);
+        this.beatPulse *= 0.9;
     }
 
-    _updateRainbowWaves(spectrum, bass, lowMid, mid, highMid, treble) {
-        const centerX = this.WIDTH / 2;
-        const centerY = this.HEIGHT / 2;
+    _detectBeat(energy) {
+        const change = energy - this.lastEnergy;
+        this.lastEnergy = energy;
 
-        const currentEnergy = (bass + lowMid + mid + highMid + treble) / 5;
-        const energyChange = Math.abs(currentEnergy - this.lastEnergyChange);
-        this.lastEnergyChange = currentEnergy;
+        if (change > 16) {
+            this.skyGlow = min(this.skyGlow + 40, 60);
+            this.beatPulse = min(this.beatPulse + 0.8, 1);
+            this._spawnDrops(10);
+            if (this.glints.length < 3) {
+                this.glints.push({ angle: PI + 0.15, speed: 0.045 + energy * 0.0002 });
+            }
+        }
+    }
 
-        const hasEnergy = currentEnergy > 10;
+    _updateLevels(spectrum) {
+        // Nivel suavizado por banda: sube de golpe, baja despacio
+        this.bands.forEach((band, i) => {
+            const target = this._getAverageEnergy(spectrum, band.f0, band.f1) / 255;
+            this.levels[i] = target > this.levels[i]
+                ? lerp(this.levels[i], target, 0.5)
+                : this.levels[i] * 0.92;
+        });
+    }
 
-        if (energyChange > this.colorChangeThreshold) {
-            this.colorShift = (this.colorShift + 180) % 360;
-            
-            if (hasEnergy) {
-                this.shockwaves.push({
-                    radius: 0,
-                    maxRadius: 300,
-                    speed: 15,
-                    color: color(255, 255, 255, 150)
+    _bandRadius(index) {
+        // El radio de cada banda rebota con su nivel y salta con los golpes
+        return this.WIDTH * (0.46 - index * 0.031)
+            * (1 + this.levels[index] * 0.06 + this.beatPulse * 0.05);
+    }
+
+    _drawSky(bass) {
+        // Crepúsculo: índigo profundo arriba, magenta cálido hacia el horizonte
+        for (let y = 0; y < this.HEIGHT; y += 4) {
+            const t = y / this.HEIGHT;
+            const hue = lerp(255, 320, t);
+            const bright = lerp(5, 13 + bass * 0.025, t) + this.skyGlow * 0.08;
+            fill(hue, 65, bright);
+            rect(0, y, this.WIDTH, 4);
+        }
+    }
+
+    _drawStars(treble) {
+        this.stars.forEach(star => {
+            const twinkle = 0.5 + 0.5 * sin(this.time * star.speed * 2 + star.phase);
+            fill(210, 12, 35 + twinkle * 40 + map(treble, 0, 255, 0, 25), 85);
+            const size = star.size * (0.8 + twinkle * 0.5);
+            ellipse(star.x, star.y, size, size);
+        });
+    }
+
+    _drawSunGlow(bass) {
+        // Amanecer cálido asomando bajo el arco
+        const glow = map(bass, 0, 255, 0, 22) + this.skyGlow * 0.3;
+        for (let i = 6; i >= 1; i--) {
+            fill(38, 75, 55, (3.5 + glow * 0.35) / i);
+            ellipse(this.cx, this.cy, this.WIDTH * 0.1 * i * (1 + bass / 255 * 0.25), this.WIDTH * 0.085 * i);
+        }
+        fill(45, 55, 95, 28 + glow);
+        ellipse(this.cx, this.cy, this.WIDTH * 0.09, this.WIDTH * 0.075);
+    }
+
+    _drawRainbow(energy) {
+        const step = 0.025;
+
+        this.bands.forEach((band, i) => {
+            const level = this.levels[i];
+            const baseRadius = this._bandRadius(i);
+            const thickness = this.WIDTH * 0.026 * (0.85 + level * 0.7);
+            const brightness = 55 + level * 45;
+            const alpha = 50 + level * 40 + this.skyGlow * 0.4;
+
+            strokeWeight(thickness);
+            let prev = null;
+
+            for (let a = PI; a <= TWO_PI + 0.001; a += step) {
+                // Ola que recorre el arco: la fase avanza con el tiempo, así que
+                // el movimiento se ve viajar de un extremo al otro. El desfase
+                // entre bandas es pequeño para que ondeen juntas, como una bandera
+                const travelingWave = sin(a * 5 - this.time * 3.4 + i * 0.35)
+                    * this.WIDTH * 0.013 * (0.25 + level * 1.6);
+                const slowSwell = (noise(a * 2.2, this.time * 1.1 + i * 1.2) - 0.5)
+                    * this.WIDTH * 0.022 * (0.4 + energy / 255);
+                const r = baseRadius + travelingWave + slowSwell;
+                const x = this.cx + cos(a) * r;
+                const y = this.cy + sin(a) * r;
+
+                if (prev) {
+                    // Brillo que recorre el arco como luz atravesando un prisma
+                    const shimmer = 0.65 + 0.35 * sin(a * 5 + this.time * 4 + i * 1.3);
+                    stroke(band.hue, 85, brightness * shimmer, alpha);
+                    line(prev.x, prev.y, x, y);
+                }
+                prev = { x: x, y: y };
+            }
+        });
+
+        noStroke();
+    }
+
+    _spawnDrops(count) {
+        for (let i = 0; i < count && this.drops.length < 70; i++) {
+            const band = floor(random(this.bands.length));
+            const angle = random(PI + 0.3, TWO_PI - 0.3);
+            const r = this._bandRadius(band);
+            this.drops.push({
+                x: this.cx + cos(angle) * r,
+                y: this.cy + sin(angle) * r,
+                vx: random(-0.6, 0.6),
+                vy: random(0.3, 1.2),
+                hue: this.bands[band].hue,
+                size: random(2.5, 5),
+                life: 100
+            });
+        }
+    }
+
+    _updateDrops() {
+        // Lluvia de color: gotas que se desprenden de los arcos con la música
+        this.bands.forEach((band, i) => {
+            if (this.levels[i] > 0.4 && random() < this.levels[i] * 0.25 && this.drops.length < 70) {
+                const angle = random(PI + 0.3, TWO_PI - 0.3);
+                const r = this._bandRadius(i);
+                this.drops.push({
+                    x: this.cx + cos(angle) * r,
+                    y: this.cy + sin(angle) * r,
+                    vx: random(-0.6, 0.6),
+                    vy: random(0.3, 1.2),
+                    hue: band.hue,
+                    size: random(2.5, 5),
+                    life: 100
                 });
             }
-        }
+        });
 
-        this._updateShockwaves(centerX, centerY);
-        this._drawRainbowWaves(spectrum, bass, lowMid, mid, highMid, treble, centerX, centerY, hasEnergy);
-        this._updateParticles();
-    }
+        for (let i = this.drops.length - 1; i >= 0; i--) {
+            const drop = this.drops[i];
+            drop.x += drop.vx;
+            drop.y += drop.vy;
+            drop.vy += 0.13;
+            drop.life -= 1.6;
 
-    _updateShockwaves(centerX, centerY) {
-        for (let i = this.shockwaves.length - 1; i >= 0; i--) {
-            const wave = this.shockwaves[i];
-            wave.radius += wave.speed;
-            
-            push();
-            noFill();
-            stroke(wave.color);
-            strokeWeight(2);
-            ellipse(centerX, centerY, wave.radius * 2);
-            pop();
+            fill(drop.hue, 80, 95, min(drop.life, 85));
+            ellipse(drop.x, drop.y, drop.size, drop.size * 1.35);
 
-            if (wave.radius >= wave.maxRadius) {
-                this.shockwaves.splice(i, 1);
+            if (drop.life <= 0 || drop.y > this.HEIGHT + 10) {
+                this.drops.splice(i, 1);
             }
         }
     }
 
-    _drawRainbowWaves(spectrum, bass, lowMid, mid, highMid, treble, centerX, centerY, hasEnergy) {
-        const rainbowColors = [
-            color(255, 0, 0),     // Rojo
-            color(255, 127, 0),   // Naranja
-            color(255, 255, 0),   // Amarillo
-            color(0, 255, 0),     // Verde
-            color(0, 0, 255),     // Azul
-            color(75, 0, 130),    // Índigo
-            color(148, 0, 211)    // Violeta
+    _drawGlints() {
+        // Destellos blancos que barren el arcoíris en cada golpe fuerte
+        for (let i = this.glints.length - 1; i >= 0; i--) {
+            const glint = this.glints[i];
+            glint.angle += glint.speed;
+
+            const fade = map(glint.angle, TWO_PI - 0.8, TWO_PI - 0.1, 1, 0);
+            this.bands.forEach((band, b) => {
+                const r = this._bandRadius(b);
+                const x = this.cx + cos(glint.angle) * r;
+                const y = this.cy + sin(glint.angle) * r;
+                fill(band.hue, 15, 100, 55 * min(fade, 1));
+                const size = this.WIDTH * 0.032;
+                ellipse(x, y, size, size * 0.8);
+            });
+
+            if (glint.angle >= TWO_PI - 0.12) {
+                this.glints.splice(i, 1);
+            }
+        }
+    }
+
+    _drawSparkles(treble) {
+        this.sparkles.forEach(sparkle => {
+            sparkle.angle += sparkle.drift;
+            if (sparkle.angle < PI + 0.15 || sparkle.angle > TWO_PI - 0.15) {
+                sparkle.drift *= -1;
+            }
+
+            const r = this._bandRadius(sparkle.band);
+            const x = this.cx + cos(sparkle.angle) * r;
+            const y = this.cy + sin(sparkle.angle) * r;
+            const twinkle = 0.5 + 0.5 * sin(this.time * sparkle.speed * 2 + sparkle.phase);
+            const alpha = twinkle * (25 + map(treble, 0, 255, 0, 55));
+
+            fill(50, 8, 100, alpha);
+            const size = 2 + twinkle * 3;
+            ellipse(x, y, size, size);
+        });
+    }
+
+    _drawClouds(mid) {
+        // Nubes suaves en los pies del arcoíris
+        const outerRadius = this.WIDTH * 0.46;
+        const puffs = [
+            { dx: -0.2, dy: 0, s: 1.15 }, { dx: 0.25, dy: -0.12, s: 0.95 },
+            { dx: 0.7, dy: 0.08, s: 1.05 }, { dx: -0.65, dy: 0.1, s: 0.85 },
+            { dx: 0, dy: 0.18, s: 1.25 }
         ];
+        const baseSize = this.WIDTH * 0.085;
+        const alpha = 9 + map(mid, 0, 255, 0, 10) + this.skyGlow * 0.15;
 
-        push();
-        fill(20, 0, 50, 40);
-        noStroke();
-        rect(0, 0, this.WIDTH, this.HEIGHT);
-        pop();
-
-        for (let i = this.rainbowWaves.length - 1; i >= 0; i--) {
-            const wave = this.rainbowWaves[i];
-            let energy = this._getWaveEnergy(spectrum, bass, lowMid, mid, highMid, treble, i);
-
-            const timeVariation = hasEnergy ? sin(this.time * (i + 1) * 0.5) * map(energy, 0, 255, 5, 20) : 0;
-            const musicVariation = hasEnergy ? sin(this.time * this.tempo * 0.01) * map(energy, 0, 255, 10, 30) : 0;
-
-            const minRadius = 40 + i * 50;
-            const maxRadius = 120 + i * 80;
-            const targetRadius = map(energy, 0, 255, minRadius, maxRadius) + timeVariation + musicVariation;
-            
-            wave.smoothRadius = lerp(wave.smoothRadius, targetRadius, 0.15);
-
-            this._drawWave(wave, rainbowColors[i], energy, hasEnergy, centerX, centerY);
-        }
+        [-1, 1].forEach(side => {
+            const footX = this.cx + side * outerRadius * 0.93;
+            const footY = this.cy - this.HEIGHT * 0.045;
+            puffs.forEach(puff => {
+                const breathe = 1 + 0.06 * sin(this.time * 0.7 + puff.dx * 5 + side);
+                fill(300, 8, 90, alpha);
+                ellipse(footX + puff.dx * baseSize, footY + puff.dy * baseSize,
+                        baseSize * puff.s * breathe, baseSize * puff.s * 0.62 * breathe);
+            });
+        });
     }
-
-    _getWaveEnergy(spectrum, bass, lowMid, mid, highMid, treble, index) {
-        switch (index) {
-            case 0: return this._getAverageEnergy(spectrum, 0, spectrum.length) * 1.5;
-            case 1: return bass * 0.9;
-            case 2: return lowMid * 0.8;
-            case 3: return mid * 0.7;
-            case 4: return highMid * 0.6;
-            case 5: return treble * 0.5;
-            default: return 0;
-        }
-    }
-
-    _drawWave(wave, color, energy, hasEnergy, centerX, centerY) {
-        push();
-        const brightness = map(energy, 0, 255, 150, 255);
-        fill(red(color), green(color), blue(color), brightness);
-        
-        stroke(255, map(energy, 0, 255, 100, 255));
-        strokeWeight(map(energy, 0, 255, 1, 3));
-        
-        ellipse(centerX, centerY, wave.smoothRadius * 2);
-        
-        if (hasEnergy && energy > 100) {
-            this._drawWaveEffects(wave, color, energy, centerX, centerY);
-        }
-        pop();
-    }
-
-    _drawWaveEffects(wave, color, energy, centerX, centerY) {
-        noFill();
-        stroke(red(color), green(color), blue(color), 100);
-        beginShape();
-        for (let a = 0; a < 360; a += 10) {
-            const angle = radians(a);
-            const distortion = sin(angle * 3 + this.time * 2) * map(energy, 100, 255, 5, 15);
-            const x = centerX + cos(angle) * (wave.smoothRadius + distortion);
-            const y = centerY + sin(angle) * (wave.smoothRadius + distortion);
-            vertex(x, y);
-        }
-        endShape(CLOSE);
-
-        if (energy > 100) {
-            noFill();
-            stroke(red(color), green(color), blue(color), 50);
-            ellipse(centerX, centerY, wave.smoothRadius * 2.2);
-        }
-    }
-
-    _updateParticles() {
-        for (let i = this.particles.length - 1; i >= 0; i--) {
-            const p = this.particles[i];
-            p.x += p.vx;
-            p.y += p.vy;
-            p.life -= 5;
-
-            push();
-            noStroke();
-            fill(red(p.color), green(p.color), blue(p.color), p.life);
-            ellipse(p.x, p.y, 4);
-            pop();
-
-            if (p.life <= 0) {
-                this.particles.splice(i, 1);
-            }
-        }
-    }
-} 
+}

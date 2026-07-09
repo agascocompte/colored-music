@@ -53,8 +53,8 @@ Ensure you have a modern web browser with JavaScript enabled.
 - **🌌 Nebula** – A living spiral galaxy: orbiting comet particles tied to frequency bands, a bass-driven core and beat shockwaves.
 - **📊 Pulse** – A modern equalizer: rounded gradient bars with falling peak caps, glass-floor reflections and a glowing horizon.
 - **🌠 Aurora** – Northern lights over a mountain ridge: five frequency-driven light curtains, twinkling stars and beat-triggered shooting stars.
-- **🌈 Rainbow** – Concentric rainbow waves that expand with the music's energy.
-- **✨ Flying Mesh** – A 3D-style terrain mesh flying to the rhythm.
+- **🌈 Rainbow** – A shimmering rainbow arch over a twilight sky: each color arc dances to its own frequency band, with beat-driven light glints sweeping across it.
+- **✨ Flying Mesh** – A rotating neon lattice warped by the music, pulsing with the bass and rippling with light waves on every beat.
 
 ## License
 
