@@ -77,10 +77,10 @@ class AudioManager {
             throw new Error(`"${file.name}" is not a valid MP3 file.`);
         }
 
-        const objectURL = URL.createObjectURL(file);
         const songName = file.name.replace(".mp3", "");
 
-        this.sound.push(loadSound(objectURL));
+        // p5 1.x acepta objetos File directamente, sin necesidad de object URL
+        this.sound.push(loadSound(file));
         this.songNames.push(songName);
         this.maxSongs = this.sound.length;
     }

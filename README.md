@@ -2,21 +2,23 @@
 
 ## Overview
 
-**Colored Music** is a web-based music visualizer that creates dynamic and colorful animations synchronized with the audio playback. This project utilizes the **p5.js** library to generate visual effects based on frequency analysis of the audio spectrum. Users can select songs, play, pause, stop, and switch between different visualization modes.
+**Colored Music** is a web-based music visualizer that creates dynamic and colorful animations synchronized with the audio playback. This project utilizes the **p5.js** library to generate visual effects based on frequency analysis of the audio spectrum. Users can search for any song, play, pause, stop, and switch between different visualization modes.
 
 ## Features
 
 - 🎵 Play, pause, stop, and switch between songs.
-- 🎨 Six visualization modes: Circles, Lines, Spiral, Dance, Rainbow and Mesh.
+- 🔍 Search any song and visualize its 30-second preview via the iTunes Search API.
+- 🎨 Six visualization modes: Spiral, Nebula, Pulse, Aurora, Rainbow and Flying Mesh.
 - 🎶 Supports loading custom MP3 files.
-- 📜 Scrollable and interactive song list.
-- 🔥 Dynamic color changes based on music intensity.
+- 📜 Library with a scrollable and interactive song list.
+- 🔥 Dynamic, beat-reactive colors driven by the frequency spectrum.
 
 ## Technologies Used
 
 - **HTML, CSS, JavaScript** – for structuring and styling.
-- **p5.js** – for audio analysis and visualization.
+- **p5.js v1.11 + p5.sound** – for audio analysis (FFT) and visualization.
 - **Tailwind CSS** – for UI styling.
+- **iTunes Search API** – for song search and audio previews.
 
 ## Setup Instructions
 
@@ -34,27 +36,25 @@ Ensure you have a modern web browser with JavaScript enabled.
    ```sh
    cd colored-music
    ```
-3. Open `index.html` in your preferred browser.
+3. Serve the folder with any static server (e.g. the VS Code *Live Server* extension) and open it in your browser.
 
 ## Usage
 
 1. Click the **Play** button to start a song.
 2. Use the **Previous** and **Next** buttons to switch tracks.
 3. Click **Stop** to halt the music.
-4. Use the visualization mode buttons to change effects.
-5. Add new songs by clicking the **Add Song** button and selecting MP3 files.
+4. Use the visualization mode pills above the canvas to change effects.
+5. Add your own songs from the **Library** tab (`＋ Add local MP3`).
+6. Find any song from the **Search** tab — results play a 30-second iTunes preview and are added to your library.
 
 ## Visualization Modes
 
-- **Circles** – Creates simple colored circles based on frequency bands.
-- **Lines** – Draws vertical lines reacting to audio intensity.
-- **Spiral** – Generates colored circles based on sound waves following a spiral pattern.
-
-## Future Improvements
-
-- Add support for more file formats (e.g., WAV, OGG).
-- Implement real-time audio recording and visualization.
-- Improve UI with additional customization options.
+- **🌀 Spiral** – Colored circles pulsing along a spiral grid.
+- **🌌 Nebula** – A living spiral galaxy: orbiting comet particles tied to frequency bands, a bass-driven core and beat shockwaves.
+- **📊 Pulse** – A modern equalizer: rounded gradient bars with falling peak caps, glass-floor reflections and a glowing horizon.
+- **🌠 Aurora** – Northern lights over a mountain ridge: five frequency-driven light curtains, twinkling stars and beat-triggered shooting stars.
+- **🌈 Rainbow** – Concentric rainbow waves that expand with the music's energy.
+- **✨ Flying Mesh** – A 3D-style terrain mesh flying to the rhythm.
 
 ## License
 

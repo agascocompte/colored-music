@@ -79,8 +79,8 @@ function draw() {
             const highMid = audioManager.getEnergy("highMid");
             const treble = audioManager.getEnergy("treble");
             visualizers[currentMode].update(spectrum);
-            // Nebula, Aurora y Rainbow pintan su propio fondo
-            if (currentMode !== 'nebula' && currentMode !== 'aurora' && currentMode !== 'rainbow') {
+            // Nebula, Aurora, Pulse y Rainbow pintan su propio fondo
+            if (currentMode !== 'nebula' && currentMode !== 'aurora' && currentMode !== 'verticales' && currentMode !== 'rainbow') {
                 visualizers[currentMode].updateBackground(bass, treble);
             }
         }
