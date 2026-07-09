@@ -1,6 +1,28 @@
 class SpiralVisualizer extends BaseVisualizer {
     constructor(width, height) {
         super(width, height);
+        this.bgcolor = color(14, 8, 30);
+        this.bgPulse = 0;
+        this.bgDrift = 0;
+    }
+
+    updateBackground(bass, treble) {
+        // Latido visible: se enciende de golpe con los graves y se apaga despacio,
+        // sin salir nunca de los tonos oscuros que dejan brillar a los círculos
+        const target = map(bass, 0, 255, 0, 95);
+        this.bgPulse = target > this.bgPulse
+            ? lerp(this.bgPulse, target, 0.5)
+            : this.bgPulse * 0.93;
+
+        // Deriva muy lenta del tono entre índigo y violeta, empujada por los agudos
+        this.bgDrift += 0.004 + treble * 0.00005;
+        const drift = sin(this.bgDrift);
+
+        this.bgcolor = color(
+            14 + this.bgPulse * 0.5 + max(drift, 0) * 16,
+            8 + this.bgPulse * 0.16,
+            30 + this.bgPulse + max(-drift, 0) * 20
+        );
     }
 
     update(spectrum) {
